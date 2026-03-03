@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Elon Musk • Official Gateway</title>
+    <!-- Font Awesome Icons (latest) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font for modern feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { overflow-x: hidden; background-color: #0a0f1e; color: #e0e0ff; min-height: 100vh; position: relative; }
+        /* 3D canvas background */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .main-container { position: relative; z-index: 10; min-height: 100vh; backdrop-filter: blur(2px); background-color: rgba(6, 12, 24, 0.7); }
+        /* header & collapsible menu */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2rem; background: rgba(0,0,0,0.5); border-bottom: 1px solid #3a4b6e; backdrop-filter: blur(8px); position: sticky; top:0; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: 2px; background: linear-gradient(135deg, #aaccff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .menu-toggle { font-size: 2rem; cursor: pointer; color: #8ab2ff; transition: 0.2s; }
+        .menu-toggle:hover { color: white; }
+        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: rgba(5, 10, 25, 0.95); backdrop-filter: blur(20px); border-right: 2px solid #2e4b8a; transition: left 0.3s ease; padding: 2rem 1rem; z-index: 200; box-shadow: 10px 0 30px rgba(0,0,0,0.7); }
+        .side-menu.open { left: 0; }
+        .menu-close { text-align: right; font-size: 2rem; color: #fff; margin-bottom: 2rem; cursor: pointer; }
+        .menu-item { display: block; padding: 1rem 1.5rem; margin: 0.5rem 0; color: #c6d9ff; text-decoration: none; font-size: 1.3rem; border-radius: 40px; transition: 0.2s; border: 1px solid transparent; }
+        .menu-item:hover { background: #1a2b4a; border-color: #4e7cb3; color: white; transform: translateX(10px); }
+        .menu-item i { margin-right: 1rem; width: 30px; color: #7aa9ff; }
+        .page-content { padding: 2rem; max-width: 1300px; margin: 0 auto; }
+        .page { display: none; animation: fade 0.3s; }
+        .page.active { display: block; }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+        h1 { font-size: 2.8rem; font-weight: 500; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff, #a0c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 2rem; color: #bfd6ff; margin: 1.5rem 0 1rem; border-left: 6px solid #3d7eff; padding-left: 1rem; }
+        .grid-2, .grid-3 { display: grid; gap: 1.8rem; margin: 2rem 0; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .glass-card { background: rgba(20, 30, 55, 0.6); backdrop-filter: blur(12px); border: 1px solid #3d5a96; border-radius: 32px; padding: 1.8rem; box-shadow: 0 20px 40px rgba(0,10,30,0.8); transition: 0.2s; }
+        .glass-card:hover { border-color: #7ca5ff; transform: scale(1.02); }
+        .elon-photo { width: 100%; border-radius: 30px; border: 3px solid #567dcc; margin-bottom: 1rem; }
+        .warning-banner { background: rgba(255, 50, 50, 0.2); border: 2px solid #ff6666; border-radius: 60px; padding: 1.2rem 2rem; margin: 2rem 0; text-align: center; font-weight: 600; backdrop-filter: blur(10px); color: #ffb8b8; }
+        .warning-banner i { color: #ff8888; margin-right: 10px; }
+        .btn { background: linear-gradient(145deg, #1f3b70, #0e1e3a); border: none; color: white; padding: 1rem 2rem; border-radius: 60px; font-size: 1.2rem; font-weight: 500; cursor: pointer; border: 1px solid #4870b0; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,50,100,0.5); margin: 0.5rem 0; display: inline-block; }
+        .btn i { margin-right: 8px; }
+        .btn:hover { background: #274e8a; border-color: #8ab9ff; }
+        .giftcard-grid { display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0; }
+        .giftcard-item { background: #16213b; border-radius: 30px; padding: 0.8rem 1.8rem; border: 2px solid #3c5e9c; display: flex; align-items: center; gap: 12px; font-size: 1.2rem; }
+        .giftcard-item i { font-size: 2rem; color: gold; }
+        .crypto-badge { background: #1a2942; border-radius: 40px; padding: 0.5rem 1.2rem; border: 2px solid #5f7ec0; display: inline-block; margin: 0.3rem; font-weight: 500; }
+        /* floating chat widget */
+        .chat-widget { position: fixed; bottom: 30px; right: 30px; width: 360px; background: rgba(6, 12, 27, 0.95); backdrop-filter: blur(20px); border: 2px solid #3e6bc7; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); z-index: 1000; resize: none; overflow: hidden; transition: 0.2s; cursor: grab; }
+        .chat-header { background: #142b55; padding: 1rem; border-radius: 28px 28px 0 0; display: flex; align-items: center; gap: 12px; font-weight: 600; color: white; border-bottom: 2px solid #5a80c0; cursor: move; }
+        .chat-header i { font-size: 1.6rem; color: #aac9ff; }
+        .chat-close { margin-left: auto; cursor: pointer; font-size: 1.6rem; color: #ccc; }
+        .chat-messages { height: 280px; overflow-y: auto; padding: 1rem; background: rgba(0,0,0,0.4); }
+        .message { margin-bottom: 1rem; display: flex; flex-direction: column; }
+        .message.user { align-items: flex-end; }
+        .message.bot { align-items: flex-start; }
+        .bubble { max-width: 80%; padding: 0.7rem 1.2rem; border-radius: 24px; font-size: 0.95rem; word-break: break-word; }
+        .user .bubble { background: #1f3e7c; color: white; border: 1px solid #6d94e8; }
+        .bot .bubble { background: #1c253f; color: #d3e0ff; border: 1px solid #5d79b0; }
+        .chat-input-area { display: flex; padding: 0.8rem; background: #0e1a2b; border-top: 1px solid #2f5090; }
+        .chat-input-area input { flex:1; background: #1e2f4a; border: 1px solid #3e5f96; border-radius: 40px; padding: 0.8rem 1.2rem; color: white; outline: none; }
+        .chat-input-area button { background: transparent; border: none; color: #8ab2ff; font-size: 1.6rem; margin-left: 8px; cursor: pointer; width: 44px; }
+        .voice-btn { color: #b3c7ff; margin-left: 4px; }
+        .chat-widget.dragging { opacity: 0.9; cursor: grabbing; }
+        @media (max-width: 600px) { .chat-widget { width: 300px; right: 10px; } .page-content { padding: 1rem; } }
+        .user-tag { font-size: 0.8rem; color: #8db0ff; margin: 4px; }
+    </style>
+</head>
+<body>
+    <!-- 3D Canvas background (starfield) -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="main-container">
+        <!-- Header with hamburger -->
+        <div class="header">
+            <div class="logo"><i class="fas fa-rocket" style="margin-right: 12px;"></i>ELON MUSK • OFFICIAL PORTAL</div>
+            <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
+        </div>
+
+        <!-- Collapsible Side Menu -->
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-close" id="menuClose"><i class="fas fa-times"></i></div>
+            <a href="#" class="menu-item" data-page="home"><i class="fas fa-home"></i> HOME</a>
+            <a href="#" class="menu-item" data-page="about"><i class="fas fa-user-astronaut"></i> ABOUT ELON</a>
+            <a href="#" class="menu-item" data-page="projects"><i class="fas fa-satellite"></i> PROJECTS</a>
+            <a href="#" class="menu-item" data-page="donate"><i class="fas fa-hand-holding-heart"></i> DONATE / SHOP</a>
+            <a href="#" class="menu-item" data-page="contact"><i class="fas fa-envelope"></i> CONTACT & RULES</a>
+            <a href="#" class="menu-item" data-page="updates"><i class="fas fa-newspaper"></i> UPDATES</a>
+        </div>
+
+        <!-- Main Pages Content -->
+        <div class="page-content">
+            <!-- HOME page -->
+            <div id="page-home" class="page active">
+                <h1><i class="fas fa-star"></i> WELCOME TO THE FUTURE</h1>
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <i class="fas fa-quote-right" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p style="font-size: 1.6rem; font-weight: 500; margin-top: 1rem;">"This platform is built by me, Elon, for every fan who wants to accelerate humanity's future."</p>
+                        <p style="margin-top: 2rem;">— Elon Musk (via AI)</p>
+                    </div>
+                    <div class="glass-card">
+                        <i class="fas fa-shield-alt" style="font-size: 3rem;"></i>
+                        <h3>Safe space for futurists</h3>
+                        <p>We are united to grow humanity. Any harassment or spam will be reported to FBI and permanently banned.</p>
+                        <div style="margin-top: 1rem;"><i class="fas fa-check-circle" style="color: #6aff9e;"></i> Verified by Stargate</div>
+                    </div>
+                </div>
+                <!-- Elon Photo (placeholder from Wikimedia) -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Elon_Musk_Royal_Society_%28crop2%29.jpg/300px-Elon_Musk_Royal_Society_%28crop2%29.jpg" alt="Elon Musk" class="elon-photo" style="max-width: 320px; margin: 1rem auto; display: block;">
+                <div class="warning-banner"><i class="fas fa-exclamation-triangle"></i> ⚡ ONLY USE OFFICIAL CONTACTS: Telegram @Muskfanportal • Email ceomuskportal@outlook.com • Team: muskteamspacex@outlook.com ⚡</div>
+            </div>
+
+            <!-- ABOUT page -->
+            <div id="page-about" class="page">
+                <h1>⏤ ABOUT ELON ⏤</h1>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Elon_Musk_2015.jpg" alt="Elon Musk" class="elon-photo" style="max-width: 400px;">
+                <div class="glass-card">
+                    <p>Visionary behind SpaceX, Tesla, Neuralink, The Boring Company, and Stargate. Working to make life multi-planetary and preserve the future of consciousness. This platform gives you direct interaction with me and my team.</p>
+                    <p><i class="fas fa-bolt" style="color: yellow;"></i> Current projects: Starship, Starlink, Optimus, Neuralink, and the new Stargate AI infrastructure.</p>
+                </div>
+            </div>
+
+            <!-- PROJECTS page -->
+            <div id="page-projects" class="page">
+                <h1>⚡ MISSION ⚡</h1>
+                <div class="grid-3">
+                    <div class="glass-card"><i class="fas fa-rocket" style="font-size: 3rem;"></i><h3>Starship</h3><p>Taking humanity to Mars.</p></div>
+                    <div class="glass-card"><i class="fas fa-satellite-dish" style="font-size: 3rem;"></i><h3>Starlink</h3><p>Global internet everywhere.</p></div>
+                    <div class="glass-card"><i class="fas fa-brain" style="font-size: 3rem;"></i><h3>Neuralink</h3><p>Merge man & AI.</p></div>
+                    <div class="glass-card"><i class="fas fa-car" style="font-size: 3rem;"></i><h3>Tesla Bot</h3><p>Optimus.</p></div>
+                    <div class="glass-card"><i class="fas fa-tunnel" style="font-size: 3rem;"></i><h3>Boring Co</h3><p>Tunnels for all.</p></div>
+                    <div class="glass-card"><i class="fas fa-star" style="font-size: 3rem;"></i><h3>Stargate</h3><p>AI superintelligence.</p></div>
+                </div>
+            </div>
+
+            <!-- DONATE page -->
+            <div id="page-donate" class="page">
+                <h1><i class="fas fa-gift"></i> SUPPORT THE MISSION</h1>
+                <div class="grid-2">
+                    <!-- Gift card section -->
+                    <div class="glass-card">
+                        <h2>🎁 GIFT CARDS</h2>
+                        <div class="giftcard-grid">
+                            <span class="giftcard-item"><i class="fab fa-apple"></i> Apple</span>
+                            <span class="giftcard-item"><i class="fas fa-dragon"></i> Razer Gold</span>
+                            <span class="giftcard-item"><i class="fab fa-cc-visa"></i> Visa</span>
+                            <span class="giftcard-item"><i class="fas fa-ticket-alt"></i> Walmart Visa</span>
+                            <span class="giftcard-item"><i class="fas fa-tshirt"></i> Nordstrom</span>
+                            <span class="giftcard-item"><i class="fab fa-cc-amazon-pay"></i> Amazon</span>
+                            <span class="giftcard-item"><i class="fab fa-cc-amex"></i> Amex</span>
+                        </div>
+                        <label>Amount ($)</label><input type="number" id="gcAmount" placeholder="e.g. 100" class="btn" style="width:100%; margin:10px 0; background:#1a2942; color:white; border:2px solid #4b7ed0;">
+                        <label>Reason (optional)</label><input type="text" id="gcReason" placeholder="For starship fuel" class="btn" style="width:100%;">
+                        <label>Select card type</label>
+                        <select id="gcType" class="btn" style="width:100%;">
+                            <option>Apple Gift Card</option><option>Razer Gold</option><option>Visa Gift Card</option>
+                            <option>Walmart Visa</option><option>Nordstrom</option><option>Amazon</option><option>Amex</option>
+                        </select>
+                        <button class="btn" style="width:100%; margin-top:25px;" id="uploadGcBtn"><i class="fab fa-telegram"></i> UPLOAD GIFT CARD via TELEGRAM</button>
+                        <p style="font-size:0.9rem; margin-top:10px;"><i class="fas fa-lock"></i> You'll send the card photo in Telegram.</p>
+                    </div>
+                    <!-- Crypto section -->
+                    <div class="glass-card">
+                        <h2>₿ CRYPTO</h2>
+                        <div style="margin-bottom:15px;">
+                            <span class="crypto-badge">BTC</span> <span class="crypto-badge">SOL</span> <span class="crypto-badge">DOGE</span>
+                            <span class="crypto-badge">XRP</span> <span class="crypto-badge">USDT</span> <span class="crypto-badge">ETH</span> <span class="crypto-badge">ADA</span>
+                        </div>
+                        <label>Amount</label><input type="text" id="cryptoAmount" placeholder="0.01 BTC / 1000 DOGE" class="btn" style="width:100%;">
+                        <label>Reason</label><input type="text" id="cryptoReason" placeholder="For Mars colony" class="btn" style="width:100%;">
+                        <label>Select crypto</label>
+                        <select id="cryptoType" class="btn" style="width:100%;">
+                            <option>Bitcoin (BTC)</option><option>Solana (SOL)</option><option>Dogecoin (DOGE)</option>
+                            <option>XRP</option><option>USDT</option><option>Ethereum (ETH)</option>
+                        </select>
+                        <button class="btn" style="width:100%; margin-top:25px;" id="requestCryptoBtn"><i class="fab fa-telegram"></i> REQUEST ADDRESS via TELEGRAM</button>
+                        <p style="font-size:0.9rem;">You'll ask Elon for the address.</p>
+                    </div>
+                </div>
+                <div class="warning-banner"><i class="fas fa-gavel"></i> Any fraud or spam will be prosecuted. FBI cyber division alerted.</div>
+            </div>
+
+            <!-- CONTACT page -->
+            <div id="page-contact" class="page">
+                <h1>📬 DIRECT CONTACT</h1>
+                <div class="glass-card">
+                    <p><i class="fab fa-telegram-plane" style="font-size:2rem;"></i> <strong>Elon's personal Telegram:</strong> @Muskfanportal (click to chat)</p>
+                    <p><i class="fas fa-envelope-open"></i> <strong>Elon direct email:</strong> ceomuskportal@outlook.com</p>
+                    <p><i class="fas fa-users"></i> <strong>Team email:</strong> muskteamspacex@outlook.com</p>
+                    <div style="margin:2rem 0;">
+                        <a href="https://t.me/Muskfanportal" target="_blank" class="btn"><i class="fab fa-telegram"></i> Open Telegram</a>
+                        <a href="mailto:ceomuskportal@outlook.com" class="btn"><i class="fas fa-envelope"></i> Email Elon</a>
+                    </div>
+                    <div class="warning-banner" style="background:rgba(255,70,70,0.3);">
+                        <i class="fas fa-skull-crossbones"></i> STRICT RULES: NO HARASSMENT, NO SPAM. Violators will be permanently banned from the platform and tracked by FBI.
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPDATES page -->
+            <div id="page-updates" class="page">
+                <h1>📡 LIVE MISSIONS</h1>
+                <div class="grid-2">
+                    <div class="glass-card">🚀 Starship flight test 5: NET May 2025</div>
+                    <div class="glass-card">🛰️ Starlink now 6000+ sats</div>
+                    <div class="glass-card">🧠 Neuralink second human implant successful</div>
+                    <div class="glass-card">🤖 Optimus gen-3 unveiled</div>
+                    <div class="glass-card">💥 Stargate AI cluster online (100k H100)</div>
+                    <div class="glass-card">🇺🇸 Elon meets with Pentagon on Starship</div>
+                </div>
+                <p style="margin-top:2rem;"><i class="fas fa-sync-alt"></i> Updates are pulled from official sources. AI always aware.</p>
+            </div>
+        </div>
+
+        <!-- Floating AI Chat Widget (draggable) -->
+        <div class="chat-widget" id="chatWidget">
+            <div class="chat-header" id="chatHeader">
+                <i class="fas fa-robot"></i> ELON·AI (voice enabled)
+                <span class="chat-close" id="minimizeChat"><i class="fas fa-minus"></i></span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot"><div class="bubble">Hello, I'm Elon's AI. I'm aware of every update and can speak with my voice. Ask me anything!</div></div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendChat"><i class="fas fa-paper-plane"></i></button>
+                <button class="voice-btn" id="voiceToggle"><i class="fas fa-volume-up"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 3D STARFIELD BACKGROUND (canvas) ----------
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let stars = [];
+            function initStars() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width; canvas.height = height;
+                stars = [];
+                for (let i=0; i<200; i++) {
+                    stars.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: Math.random() * 1.8,
+                        vx: (Math.random()-0.5) * 0.3,
+                        vy: (Math.random()-0.5) * 0.2,
+                    });
+                }
+            }
+            function drawStars() {
+                ctx.clearRect(0,0,width,height);
+                ctx.fillStyle = '#ffffff';
+                for (let s of stars) {
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.radius, 0, 2*Math.PI);
+                    ctx.fillStyle = `rgba(255,240,200,${0.5+Math.random()*0.5})`;
+                    ctx.fill();
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    if (s.x<0) s.x=width;
+                    if (s.x>width) s.x=0;
+                    if (s.y<0) s.y=height;
+                    if (s.y>height) s.y=0;
+                }
+                requestAnimationFrame(drawStars);
+            }
+            window.addEventListener('resize', ()=>{ initStars(); });
+            initStars();
+            drawStars();
+
+            // ---------- MENU COLLAPSE ----------
+            const menuToggle = document.getElementById('menuToggle');
+            const sideMenu = document.getElementById('sideMenu');
+            const menuClose = document.getElementById('menuClose');
+            menuToggle.addEventListener('click', ()=> sideMenu.classList.add('open'));
+            menuClose.addEventListener('click', ()=> sideMenu.classList.remove('open'));
+
+            // PAGE NAVIGATION
+            const menuItems = document.querySelectorAll('.menu-item');
+            const pages = document.querySelectorAll('.page');
+            menuItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = item.getAttribute('data-page');
+                    pages.forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-'+pageId).classList.add('active');
+                    sideMenu.classList.remove('open');  // collapse after select
+                });
+            });
+
+            // ---------- DONATION BUTTONS (telegram redirect) ----------
+            function getTelegramLink(text) {
+                return 'https://t.me/Muskfanportal?text=' + encodeURIComponent(text);
+            }
+            document.getElementById('uploadGcBtn').addEventListener('click', ()=>{
+                let amount = document.getElementById('gcAmount').value || 'unspecified amount';
+                let reason = document.getElementById('gcReason').value || 'no reason';
+                let type = document.getElementById('gcType').value;
+                let msg = `I want to donate ${amount} using ${type}. Reason: ${reason}. (Gift card photo attached in chat)`;
+                window.open(getTelegramLink(msg), '_blank');
+            });
+            document.getElementById('requestCryptoBtn').addEventListener('click', ()=>{
+                let amount = document.getElementById('cryptoAmount').value || 'some';
+                let reason = document.getElementById('cryptoReason').value || 'support';
+                let crypto = document.getElementById('cryptoType').value;
+                let msg = `I want to donate ${amount} ${crypto}. Reason: ${reason}. Please provide your ${crypto} address.`;
+                window.open(getTelegramLink(msg), '_blank');
+            });
+
+            // ---------- FLOATING CHAT (DRAGGABLE) ----------
+            const chatWidget = document.getElementById('chatWidget');
+            const header = document.getElementById('chatHeader');
+            let isDragging = false;
+            let offsetX, offsetY;
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - chatWidget.getBoundingClientRect().left;
+                offsetY = e.clientY - chatWidget.getBoundingClientRect().top;
+                chatWidget.classList.add('dragging');
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                chatWidget.style.left = (e.clientX - offsetX) + 'px';
+                chatWidget.style.top = (e.clientY - offsetY) + 'px';
+                chatWidget.style.right = 'auto';
+                chatWidget.style.bottom = 'auto';
+            });
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                chatWidget.classList.remove('dragging');
+            });
+            document.getElementById('minimizeChat').addEventListener('click', ()=>{
+                chatWidget.style.display = chatWidget.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // ---------- CHAT FUNCTIONALITY (AI + voice) ----------
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendChat');
+            const voiceBtn = document.getElementById('voiceToggle');
+
+            // load history from localStorage
+            function loadChat() {
+                let saved = localStorage.getItem('elonChatHistory');
+                if (saved) {
+                    chatMessages.innerHTML = saved;
+                } else {
+                    // default bot welcome
+                }
+            }
+            function saveChat() {
+                localStorage.setItem('elonChatHistory', chatMessages.innerHTML);
+            }
+            loadChat();
+
+            function addMessage(text, sender) {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message', sender);
+                msgDiv.innerHTML = `<div class="bubble">${text}</div>`;
+                chatMessages.appendChild(msgDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                saveChat();
+            }
+
+            // simple AI response (aware of updates, promotes platform)
+            function aiResponse(userMsg) {
+                let msg = userMsg.toLowerCase();
+                if (msg.includes('hello') || msg.includes('hi')) return "Greetings, human. I'm Elon's AI. I assure you, Elon built this platform personally for you.";
+                if (msg.includes('project') || msg.includes('starship')) return "Starship is targeting Mars. We're also building Stargate, the most advanced AI cluster. I have realtime awareness of every launch.";
+                if (msg.includes('update') || msg.includes('news')) return "The latest: Starlink now serves Antarctica! And Neuralink just enabled a paraplegic to walk. Check Updates page.";
+                if (msg.includes('who are you')) return "I am ELON·AI, built by Elon Musk to assist you with his real voice. I know everything about his companies.";
+                if (msg.includes('voice') || msg.includes('speak')) return "Click the speaker icon next to input, I'll read my responses using Elon's voice profile.";
+                if (msg.includes('donation') || msg.includes('gift card')) return "We accept gift cards and crypto. Use the Donate page. All funds go to Starship & Stargate.";
+                if (msg.includes('telegram') || msg.includes('contact')) return "You can reach Elon directly on Telegram: @Muskfanportal. Please follow the rules or FBI tracking applies.";
+                if (msg.includes('thank')) return "You're welcome. Together we accelerate the future.";
+                return "I'm processing your query. Remember, this platform is a safe space created by Elon. For exact details, you can use the menu.";
+            }
+
+            sendBtn.addEventListener('click', ()=>{
+                let txt = chatInput.value.trim();
+                if (!txt) return;
+                addMessage(txt, 'user');
+                chatInput.value = '';
+                setTimeout(() => {
+                    let reply = aiResponse(txt);
+                    addMessage(reply, 'bot');
+                }, 400);
+            });
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });
+
+            // voice (text-to-speech) with "Elon voice" approximation
+            let speaking = false;
+            voiceBtn.addEventListener('click', ()=>{
+                let lastMessage = chatMessages.lastElementChild;
+                if (lastMessage && lastMessage.classList.contains('bot')) {
+                    let text = lastMessage.querySelector('.bubble').innerText;
+                    let utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 0.8;
+                    utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes('Google UK English Male') || v.name.includes('Alex') || v.name.includes('Samantha'));
+                    speechSynthesis.speak(utterance);
+                } else {
+                    let utterance = new SpeechSynthesisUtterance("I am Elon Musk, this platform is built by me.");
+                    utterance.rate = 0.85; utterance.pitch = 0.7;
+                    speechSynthesis.speak(utterance);
+                }
+            });
+
+            // ---------- ASSIGN RANDOM USERNAME (stored) ----------
+            let username = localStorage.getItem('fanUsername');
+            if (!username) {
+                username = 'fan' + Math.floor(Math.random()*10000);
+                localStorage.setItem('fanUsername', username);
+            }
+            const userTag = document.createElement('div');
+            userTag.className = 'user-tag';
+            userTag.innerHTML = `Your username: @${username} (use it when contacting Elon)`;
+            chatMessages.prepend(userTag);
+
+            // ---------- SIMULATED "REPLY FROM ELON" (for demonstration) ----------
+            const note = document.createElement('div');
+            note.style.fontSize = '0.7rem'; note.style.color = '#aac9ff'; note.style.padding = '4px';
+            note.innerText = 'Mention your @'+username+' on Telegram to get replies here (simulated)';
+            chatMessages.appendChild(note);
+        })();
+    </script>
+</body>
+</html>
